@@ -1,28 +1,39 @@
 #include <stdio.h>
+#include <string.h>
 
-void cat(FILE *, FILE *);
+void copyfile(FILE *, FILE *);
 
 int main(int argc, char *argv[])
 {
     FILE* fp;
 
+/* print command line arguments */
+    for (int i=0; i < argc; ++i)
+        printf("argv[%d] = %s\n", i, argv[i]);
+
     if (argc == 1)
-        cat(stdin, stdout);
+        copyfile(stdin, stdout);
     else {
-        while (--argc > 0)
-            if ((fp = fopen(*++argv, "r")) == NULL) {
-                printf("cat: can't open %s\n", *argv);
+        for (int i=1; i < argc; ++i) {
+            /* standard input */
+            if (strcmp(argv[i], "-") == 0)
+                copyfile(stdin, stdout);
+            /* cannot read file */
+            else if ((fp = fopen(argv[i], "r")) == NULL) {
+                printf("cat: can't open %s\n", argv[i]);
                 return 1;
+            /* read file */
             } else {
-                cat(fp, stdout);
+                copyfile(fp, stdout);
                 fclose(fp);
             }
+        }
     }
 
     return 0;
 }
 
-void cat(FILE *ifp, FILE *ofp)
+void copyfile(FILE *ifp, FILE *ofp)
 {
     int c;
 
