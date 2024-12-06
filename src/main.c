@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-void copyfile(FILE *, FILE *);
+void cat(FILE *, FILE *, int);
 
 int main(int argc, char *argv[])
 {
@@ -12,19 +12,20 @@ int main(int argc, char *argv[])
         printf("argv[%d] = %s\n", i, argv[i]);
 
     if (argc == 1)
-        copyfile(stdin, stdout);
+        cat(stdin, stdout);
     else {
         for (int i=1; i < argc; ++i) {
             /* standard input */
             if (strcmp(argv[i], "-") == 0)
-                copyfile(stdin, stdout);
+                cat(stdin, stdout, 0);
+            else if (strcmp(argv[i], "-b") == 0)
             /* cannot read file */
             else if ((fp = fopen(argv[i], "r")) == NULL) {
                 printf("cat: can't open %s\n", argv[i]);
                 return 1;
             /* read file */
             } else {
-                copyfile(fp, stdout);
+                cat(fp, stdout);
                 fclose(fp);
             }
         }
@@ -33,8 +34,9 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void copyfile(FILE *ifp, FILE *ofp)
+void cat(FILE *ifp, FILE *ofp, int opt)
 {
+    static int num; // number output lines
     int c;
 
     while ((c = getc(ifp)) != EOF)
